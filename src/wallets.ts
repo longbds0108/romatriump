@@ -58,9 +58,10 @@ export function watchSolanaWallets(onChange: (w: SolWallet[]) => void): () => vo
   return () => offs.forEach((off) => off());
 }
 
-export async function connectSolana(wallet: SolWallet): Promise<{ signer: SignerLike; publicKey: PublicKey }> {
+/** `silent` reconnects a wallet the user already approved, without a prompt (Wallet Standard). */
+export async function connectSolana(wallet: SolWallet, silent = false): Promise<{ signer: SignerLike; publicKey: PublicKey }> {
   const features = wallet.features as any;
-  const { accounts } = await features["standard:connect"].connect();
+  const { accounts } = await features["standard:connect"].connect(silent ? { silent: true } : undefined);
   const account = accounts?.[0];
   if (!account) throw new Error(`${wallet.name} returned no account.`);
   const chain = chainId();

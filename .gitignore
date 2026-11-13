@@ -8,3 +8,4 @@ contracts/cache
 contracts/broadcast
 src/config.generated.json
 .DS_Store
+e2e/out/

@@ -285,7 +285,7 @@ function Graduation({ p, l, onDone }: { p: T.CurveParams; l: T.LaunchView; onDon
 
   if (l.status === "Graduated" && l.poolBase58)
     return (
-      <div className="surface panel">
+      <div className="surface panel" id="graduation">
         <p className="eyebrow">Graduation</p>
         <h3 style={{ marginTop: 8 }}>Graduated to Meteora</h3>
         <div className="quote" style={{ borderTop: 0, paddingTop: 0 }}>
@@ -310,7 +310,7 @@ function Graduation({ p, l, onDone }: { p: T.CurveParams; l: T.LaunchView; onDon
     );
 
   return (
-    <div className="surface panel">
+    <div className="surface panel" id="graduation">
       <h3>Graduation</h3>
       <p className="muted" style={{ marginTop: 0 }}>
         At {usdc(p.graduationUsdc)} USDC raised the curve closes. Anyone can then open a Meteora DAMM v1 pool with {usdc(p.graduationUsdc)} USDC and {tok(p.lpSupply)} $

@@ -37,4 +37,5 @@ npx tsx scripts/check.ts      # preflight
 npm run build:contracts && npm run deploy   # needs Hadrian USDC gas on ROME_EVM_KEY
 npm run smoke                 # launch → trade → graduate on testnet
 npm run dev                   # http://127.0.0.1:5180
+E2E_LAUNCH=<id> npm run e2e   # browser E2E on the live chain (phases: pages evm launch sol mobile)
 ```

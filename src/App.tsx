@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cfg, evmTx, TRIUMPH } from "./config";
 import { LaneCtx, useLaneState, useLanes } from "./lanes";
 import { Shell } from "./Shell";
@@ -208,7 +208,9 @@ function LaunchDialog({ onClose, onDone, launches }: { onClose: () => void; onDo
   const [symbol, setSymbol] = useState("");
   const S = useSteps();
   const sym = symbol.trim().toUpperCase();
-  const taken = launches.some((l) => l.symbol.toUpperCase() === sym);
+  // Only before the run starts: once our own launch lands, the list contains this symbol too.
+  const started = S.busy || S.steps.length > 0;
+  const taken = !started && launches.some((l) => l.symbol.toUpperCase() === sym);
   const valid = name.trim().length > 0 && new TextEncoder().encode(name.trim()).length <= 32 && /^[A-Z0-9]{1,10}$/.test(sym) && !taken;
 
   const go = () =>
@@ -340,19 +342,28 @@ function SiteFooter({ onLaunch, go }: { onLaunch: () => void; go: (v: View) => v
 
 type View = { name: "home" } | { name: "activity" } | { name: "token"; id: number };
 
+function viewFromHash(): View {
+  const m = location.hash.match(/^#\/launch\/(\d+)/);
+  if (m) return { name: "token", id: Number(m[1]) };
+  return location.hash.startsWith("#/activity") ? { name: "activity" } : { name: "home" };
+}
+const hashOf = (v: View) => (v.name === "token" ? `#/launch/${v.id}` : v.name === "activity" ? "#/activity" : "#/");
+
 export default function App() {
   const lanes = useLaneState();
   const data = useChainData();
-  const [view, setView] = useState<View>(() => {
-    const m = location.hash.match(/^#\/launch\/(\d+)/);
-    if (m) return { name: "token", id: Number(m[1]) };
-    return location.hash.startsWith("#/activity") ? { name: "activity" } : { name: "home" };
-  });
+  const [view, setView] = useState<View>(viewFromHash);
   const [launching, setLaunching] = useState(false);
+  // The hash is the source of truth: links, the address bar and Back/Forward all route.
+  useEffect(() => {
+    const on = () => (setView(viewFromHash()), window.scrollTo({ top: 0 }));
+    window.addEventListener("hashchange", on);
+    return () => window.removeEventListener("hashchange", on);
+  }, []);
   const go = (v: View) => {
-    setView(v);
-    history.replaceState(null, "", v.name === "token" ? `#/launch/${v.id}` : v.name === "activity" ? "#/activity" : "#/");
-    window.scrollTo({ top: 0 });
+    const h = hashOf(v);
+    if (location.hash !== h) location.hash = h;
+    else (setView(v), window.scrollTo({ top: 0 }));
   };
   const scrollTo = (id: string) => {
     if (view.name !== "home") go({ name: "home" });

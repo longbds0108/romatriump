@@ -1,0 +1,16 @@
+import "dotenv/config";
+import { Connection, Keypair, PublicKey } from "@solana/web3.js";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { cfg, deployer } from "../lib/env.js";
+import * as T from "../lib/triumph.js";
+const kp = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(process.env.ROME_SOLANA_KEY!)));
+const conn = new Connection(cfg.solanaRpc, "confirmed");
+const sol = T.solanaLane(cfg, kp);
+const pub = T.publicClient(cfg);
+const usdc = T.usdcMintHex(cfg);
+const ata = getAssociatedTokenAddressSync(new PublicKey(cfg.usdcMint), kp.publicKey);
+const ab = await conn.getTokenAccountBalance(ata).catch(() => null);
+console.log("solana wallet SOL", (await conn.getBalance(kp.publicKey)) / 1e9, "USDC ata", ab?.value.uiAmountString);
+console.log("synthetic", sol.address, "gas", Number(await pub.getBalance({ address: sol.address })) / 1e18, "usdc spl", Number(await T.splBalance(cfg, sol.address, usdc)) / 1e6);
+const me = deployer().address;
+console.log("deployer gas", Number(await pub.getBalance({ address: me })) / 1e18, "usdc spl", Number(await T.splBalance(cfg, me, usdc)) / 1e6);
