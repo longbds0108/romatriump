@@ -40,12 +40,20 @@ if (before === 0n) {
   process.exit(1);
 }
 const gp = await pub.getGasPrice();
+// Rome prices Solana account creation into gas (a 12 KB contract needs ~72M); it charges the exact
+// gas used, but the sender must hold limit × maxFee, so size both tightly.
+const GAS = BigInt(process.env.DEPLOY_GAS ?? 78_000_000);
+const maxFee = (gp * 105n) / 100n;
+if (before < GAS * maxFee) {
+  console.error(`Need ${formatUnits(GAS * maxFee, 18)} USDC of gas headroom, have ${formatUnits(before, 18)}.`);
+  process.exit(1);
+}
 const hash = await wallet.deployContract({
   abi: TRIUMPH_ABI,
   bytecode: artifact.bytecode.object as Hex,
   args: [config],
-  gas: 60_000_000n, // Rome prices Solana account creation into gas; charged gas is the exact usage
-  maxFeePerGas: (gp * 3n) / 2n,
+  gas: GAS,
+  maxFeePerGas: maxFee,
   maxPriorityFeePerGas: 0n,
 });
 console.log("tx", hash);
@@ -55,3 +63,4 @@ const after = await pub.getBalance({ address: account.address });
 console.log("Triumph deployed:", r.contractAddress, "| gas used", r.gasUsed.toString(), "| cost", formatUnits(before - after, 18), "USDC");
 console.log(`${cfg.explorerUrl}/address/${r.contractAddress}`);
 console.log(`→ set TRIUMPH_ADDRESS=${r.contractAddress} in .env`);
+console.log(`TRIUMPH_FROM_BLOCK=${r.blockNumber}`);

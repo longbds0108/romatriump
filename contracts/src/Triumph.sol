@@ -95,7 +95,7 @@ contract Triumph {
     /// Lamport budgets for the Solana accounts each step creates (billed to the caller in gas).
     uint64 public launchRent = 5_000_000;
     uint64 public vaultRent = 10_000_000;
-    uint64 public poolRent = 22_000_000;
+    uint64 public poolRent = 30_000_000; // measured on Hadrian: ~27.7M (pool, LP mint, vault LPs, fee ATAs, Metaplex metadata incl. its fee)
 
     Launch[] internal _launches;
     mapping(bytes32 => uint256) public launchIdByMint; // id + 1
