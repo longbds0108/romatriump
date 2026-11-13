@@ -16,6 +16,8 @@ Verified with real transactions:
 - Gas was funded from Solana devnet only: SOL → USDC on rome-dex's native pool (`scripts/swap-sol-usdc.ts`), then `fundSyntheticGas` + a native transfer to the deployer (`scripts/fund-from-solana.ts`).
 - Measured graduation rent ≈ 27.7M lamports (Metaplex metadata alone 13.7M incl. its fee); default `poolRent` is now 30M.
 
+**Using the app:** see the [user guide](docs/USER_GUIDE.md).
+
 ## Layout
 - `contracts/` Foundry. `src/Triumph.sol`, `src/IRome.sol`, `test/` (27 tests; precompile mocks that also enforce Rome's one-track rule).
 - `lib/` registry config, Meteora account derivation (after rome-protocol/cardo), dual-lane client.
